@@ -9,10 +9,13 @@ const researchRoutes = require('./routes/research');
 const sessionRoutes = require('./routes/sessions');
 
 const app = express();
+app.get('/', (req, res) => {
+  res.send('CuraLink Backend API is running');
+});
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'https://your-frontend-domain.vercel.app'
+     process.env.FRONTEND_URL
   ],
   credentials: true
 }));
