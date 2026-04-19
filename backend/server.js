@@ -1,5 +1,13 @@
 const express = require('express');
 const cors = require('cors');
+
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'https://your-frontend-domain.vercel.app'
+  ],
+  credentials: true
+}));
 const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
