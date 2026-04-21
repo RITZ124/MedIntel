@@ -37,7 +37,7 @@ async function callHuggingFace(prompt, systemPrompt) {
     : `<s>[INST] ${prompt} [/INST]`;
 
   const res = await axios.post(
-    `https://api-inference.huggingface.co/models/${HF_MODEL}`,
+    `https://router.huggingface.co/hf-inference/models/${HF_MODEL}`,
     {
       inputs: fullPrompt,
       parameters: {
