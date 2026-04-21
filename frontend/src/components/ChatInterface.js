@@ -21,7 +21,7 @@ const exportChatToPDF = async () => {
 
   element.style.height = 'auto';
   element.style.overflow = 'visible';
-
+  element.classList.add('pdf-export-mode');
   const canvas = await html2canvas(element, {
     scale: 2,
     useCORS: true,
@@ -29,6 +29,7 @@ const exportChatToPDF = async () => {
     windowWidth: element.scrollWidth,
     windowHeight: element.scrollHeight
   });
+  element.classList.remove('pdf-export-mode');
 
   element.style.height = originalHeight;
   element.style.overflow = originalOverflow;
