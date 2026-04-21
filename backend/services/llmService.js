@@ -67,8 +67,10 @@ async function callHuggingFace(prompt, systemPrompt) {
 async function callAnthropic(prompt, systemPrompt) {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error('No Anthropic key');
+
   console.log('Anthropic model: claude-3-haiku-20240307');
   console.log('Anthropic key exists:', !!key);
+
   const res = await axios.post(
     'https://api.anthropic.com/v1/messages',
     {
@@ -78,7 +80,12 @@ async function callAnthropic(prompt, systemPrompt) {
       messages: [
         {
           role: 'user',
-          content: prompt
+          content: [
+            {
+              type: 'text',
+              text: prompt
+            }
+          ]
         }
       ]
     },
@@ -91,6 +98,9 @@ async function callAnthropic(prompt, systemPrompt) {
       timeout: 60000
     }
   );
+
+  return res.data?.content?.[0]?.text || '';
+}
 
   return res.data?.content?.[0]?.text || '';
 }
