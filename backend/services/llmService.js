@@ -2,8 +2,8 @@ const axios = require('axios');
 
 const OLLAMA_BASE = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2';
-const HF_TOKEN = process.env.HF_API_TOKEN;
-const HF_MODEL = process.env.HF_MODEL || 'mistralai/Mistral-7B-Instruct-v0.3';
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 
 /**
  * Primary: Use Ollama (local open-source LLM)
@@ -25,82 +25,36 @@ async function callOllama(prompt, systemPrompt) {
   return res.data?.response || '';
 }
 
-/**
- * Fallback: HuggingFace Inference API
- */
-async function callHuggingFace(prompt, systemPrompt) {
-  if (!HF_TOKEN) throw new Error('No HuggingFace token');
-  console.log('HF MODEL:', HF_MODEL);
-  console.log('HF URL:', `https://api-inference.huggingface.co/models/${HF_MODEL}`);
-  const fullPrompt = systemPrompt
-    ? `<s>[INST] ${systemPrompt}\n\n${prompt} [/INST]`
-    : `<s>[INST] ${prompt} [/INST]`;
+async function callGroq(prompt, systemPrompt) {
+  if (!GROQ_API_KEY) throw new Error('No Groq API key');
 
   const res = await axios.post(
-    `https://router.huggingface.co/hf-inference/models/${HF_MODEL}`,
+    'https://api.groq.com/openai/v1/chat/completions',
     {
-      inputs: fullPrompt,
-      parameters: {
-        max_new_tokens: 1500,
-        temperature: 0.3,
-        top_p: 0.9,
-        return_full_text: false
-      }
-    },
-    {
-      headers: { Authorization: `Bearer ${HF_TOKEN}` },
-      timeout: 90000
-    }
-  );
-
-  const generated =
-    res.data?.[0]?.generated_text ||
-    res.data?.generated_text ||
-    '';
-
-  return generated;
-}
-
-/**
- * Fallback: Anthropic API (for demo reliability)
- */
-async function callAnthropic(prompt, systemPrompt) {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) throw new Error('No Anthropic key');
-
-  console.log('Anthropic model: claude-3-haiku-20240307');
-  console.log('Anthropic key exists:', !!key);
-
-  const res = await axios.post(
-    'https://api.anthropic.com/v1/messages',
-    {
-      model: 'claude-3-haiku-20240307',
-      max_tokens: 1000,
-      system: systemPrompt || 'You are a medical research assistant.',
+      model: GROQ_MODEL,
       messages: [
         {
+          role: 'system',
+          content: systemPrompt || 'You are a medical research assistant.'
+        },
+        {
           role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: prompt
-            }
-          ]
+          content: prompt
         }
-      ]
+      ],
+      temperature: 0.2,
+      max_tokens: 2000
     },
     {
       headers: {
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-        'content-type': 'application/json'
+        Authorization: `Bearer ${GROQ_API_KEY}`,
+        'Content-Type': 'application/json'
       },
       timeout: 60000
     }
   );
 
-  return res.data?.content?.[0]?.text || '';
+  return res.data?.choices?.[0]?.message?.content || '';
 }
 
 /**
@@ -215,28 +169,14 @@ async function generateMedicalAnalysis(userMessage, context, publications, clini
   } catch (ollamaErr) {
     console.log('⚠️ Ollama unavailable:', ollamaErr.message);
 
-    // Fallback to HuggingFace
-    if (HF_TOKEN) {
+        if (!response) {
       try {
-        console.log('🤖 Attempting HuggingFace...');
-        response = await callHuggingFace(prompt, systemPrompt);
-        llmUsed = `HuggingFace (${HF_MODEL})`;
-        console.log('✅ HuggingFace response received');
-      } catch (hfErr) {
-        console.log('⚠️ HuggingFace unavailable:', hfErr.message);
-      }
-    }
-
-    // Fallback to Anthropic (demo reliability)
-    if (!response) {
-      try {
-        console.log('🤖 Attempting Anthropic fallback...');
-        response = await callAnthropic(prompt, systemPrompt);
-        llmUsed = 'Anthropic Claude (fallback)';
-        console.log('✅ Anthropic fallback response received');
-      } catch (anthropicErr) {
-        console.log('Anthropic error response:', anthropicErr.response?.data);
-        console.error('❌ All LLM providers failed:', anthropicErr.message);
+        console.log('🤖 Attempting Groq...');
+        response = await callGroq(prompt, systemPrompt);
+        llmUsed = `Groq (${GROQ_MODEL})`;
+        console.log('✅ Groq response received');
+      } catch (groqErr) {
+        console.log('⚠️ Groq unavailable:', groqErr.message);
         response = generateFallbackResponse(context, publications, clinicalTrials);
         llmUsed = 'Rule-based fallback';
       }
