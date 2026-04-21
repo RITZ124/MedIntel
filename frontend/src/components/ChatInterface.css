@@ -578,6 +578,50 @@
   cursor: pointer;
 }
 
+
 .export-btn:hover {
   opacity: 0.9;
+}
+.pdf-export-mode {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+.pdf-export-mode .message-content,
+.pdf-export-mode .message-main-content,
+.pdf-export-mode .pub-card,
+.pdf-export-mode .trial-card,
+.pdf-export-mode .sources-section,
+.pdf-export-mode .source-group {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-color: #d1d5db !important;
+}
+
+.pdf-export-mode h1,
+.pdf-export-mode h2,
+.pdf-export-mode h3,
+.pdf-export-mode h4,
+.pdf-export-mode strong,
+.pdf-export-mode p,
+.pdf-export-mode li,
+.pdf-export-mode span,
+.pdf-export-mode div {
+  color: #111827 !important;
+}
+
+.pdf-export-mode .retrieval-badge span,
+.pdf-export-mode .source-badge,
+.pdf-export-mode .status-badge {
+  color: #ffffff !important;
+}
+
+.pdf-export-mode a {
+  color: #2563eb !important;
+}
+
+.pdf-export-mode .assistant-avatar,
+.pdf-export-mode .pub-link,
+.pdf-export-mode .toggle-sources {
+  opacity: 1 !important;
 }
