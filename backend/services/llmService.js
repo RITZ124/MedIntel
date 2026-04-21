@@ -102,9 +102,6 @@ async function callAnthropic(prompt, systemPrompt) {
   return res.data?.content?.[0]?.text || '';
 }
 
-  return res.data?.content?.[0]?.text || '';
-}
-
 /**
  * Build structured medical analysis prompt
  */
