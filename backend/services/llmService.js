@@ -93,6 +93,7 @@ async function callAnthropic(prompt, systemPrompt) {
       headers: {
         'x-api-key': key,
         'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
         'content-type': 'application/json'
       },
       timeout: 60000
@@ -234,6 +235,7 @@ async function generateMedicalAnalysis(userMessage, context, publications, clini
         llmUsed = 'Anthropic Claude (fallback)';
         console.log('✅ Anthropic fallback response received');
       } catch (anthropicErr) {
+        console.log('Anthropic error response:', anthropicErr.response?.data);
         console.error('❌ All LLM providers failed:', anthropicErr.message);
         response = generateFallbackResponse(context, publications, clinicalTrials);
         llmUsed = 'Rule-based fallback';
